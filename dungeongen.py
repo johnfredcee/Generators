@@ -10,7 +10,7 @@ from connection import Connection
 from sets import Set
 
 config = Config(sample_buffers=1, samples=4,
-				depth_size=16, double_buffer=True,)
+		depth_size=16, double_buffer=True,)
 window = pyglet.window.Window(resizable=True, config=config)
 
 class Room(object):
@@ -19,6 +19,7 @@ class Room(object):
 		self.branches = branches
 		self.points = []
 		self.centre_point = []
+
 		
 	def build_geometry(self, points):
 		self.centre_point = [ ( points[self.centre].x, points[self.centre].y ) ]
@@ -31,9 +32,11 @@ class Dungeon(object):
 		self.gridy = gridy
 		self.end_points = []
 		self.point_connection_count = []
-		self.connections = Set()		
+		self.connections = Set()
+		self.rooms = []
+		self.room_outlines =  []		
 		return
-		   
+	
 	def generate_end_points(self, peturbation):
 		self.end_points = []
 		max_dist = math.sqrt(self.gridx * self.gridx + self.gridy * self.gridy)
@@ -114,17 +117,33 @@ class Dungeon(object):
 			self.point_connection_count.append(self.connection_count(i))		
 
 	def identify_rooms(self):
+		""" Build a list of connections to each room """
 		self.rooms = []
 		self.count_connections()
 		for i in range(0, len(self.end_points)):
 			if self.point_connection_count[i] > 2:	
 				self.rooms.append(Room(i, self.connection_branches(i)))
-		print "%d Rooms" % (len(self.rooms))
+		#print "%d Rooms" % (len(self.rooms))
+		#for r in self.rooms:
+		#	print "Room"
+		#	print "Centre %s Branches %s " % (r.centre, r.branches)
+		return
+	
+	def build_room_geometry(self):
+		""" Given that the rooms have been identified, flesh out their geometry """
 		for r in self.rooms:
-			print "Room"
-			print "Centre %s Branches %s " % (r.centre, r.branches)
-		
+			for b in r.branches:
+				line = ( self.end_points[r.centre].x , self.end_points[r.centre].y,
+					 self.end_points[b].x, self.end_points[b].y )
+				## now, interoplate a bit along the line in order to get the vertex of a polygon
+				point = ((line[2] - line[0]) * 0.3 + line[0],
+					 (line[3] - line[1]) * 0.3 + line[1])				
+				r.points = r.points + [ point ]
+			# print "Points: ", r.points
+		return
+	
 	def build_display_list(self):
+		"""" Actually build a list of primitives to draw """
 		glPointSize(4)
 		glEnable(GL_POINT_SMOOTH)
 		self.vertices = []
@@ -137,19 +156,29 @@ class Dungeon(object):
 			self.lines.append( self.end_points[c[0]].y )
 			self.lines.append( self.end_points[c[1]].x )
 			self.lines.append( self.end_points[c[1]].y )
-			
+		self.room_outlines = []
+		for r in self.rooms:
+			outline = []
+			for p in r.points:
+				outline = outline + [ p[0], p[1] ]
+			print outline
+			self.room_outlines.append(outline)			      
+		
 	def draw(self):
 		glColor3f(0.0,1.0,1.0)
 		pyglet.graphics.draw( len(self.vertices) / 2, pyglet.gl.GL_POINTS, ('v2f', self.vertices ))
 		glColor3f(1.0,0.0,0.0)
 		pyglet.graphics.draw( len(self.lines) / 2, pyglet.gl.GL_LINES, ('v2f', self.lines ))
-
+		glColor3f(0.0,0.0,1.0)		
+		for outline in self.room_outlines:
+			pyglet.graphics.draw( len(outline) / 2, pyglet.gl.GL_LINE_LOOP, ('v2f', outline ))
+			
 def update(dt):
 		#print dt
-		return
+	return
 
 pyglet.clock.schedule(update)   
-   
+
 def setup():
 	# One-time GL setup
 	glClearColor(1, 1, 1, 1)
@@ -193,9 +222,10 @@ def on_draw():
 dungeon = Dungeon(8,8)
 dungeon.generate_end_points(0.65)
 dungeon.build_lines()
-dungeon.build_display_list()
 dungeon.build_end_lines()
 dungeon.identify_rooms()
+dungeon.build_room_geometry()
+dungeon.build_display_list()
 
 #print end_points
 pyglet.app.run()

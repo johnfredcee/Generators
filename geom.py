@@ -59,7 +59,24 @@ def line_end_perp2d(p1, p2, w):
 	pp1 = vec3(p1.x - dy * w, p1.y + dx * w)
 	pp2 = vec3(p1.x + dy * w, p1.y - dx * w)
 	return (pp1, pp2)
-	
+
+# note t = 0 == p1 t == 1 == p2
+def line_interp_perp2d(p1, p2, w, t):
+	""" Returns a line perpendicular to the line from p1 to p2 at the point at interval t, of w length """
+	dx = ( p1.x - p2.x ) 
+	dy = ( p1.y - p2.y )
+	l = math.sqrt( dx * dx + dy * dy)
+	dx = dx / l
+	dy = dy / l
+	pp1 = vec3(p1.x - dy * w, p1.y + dx * w)
+	pp2 = vec3(p1.x + dy * w, p1.y - dx * w)
+        pp1.x += dx * t * l
+        pp1.y += dy * t * l
+        pp2.x += dx * t * l
+        pp2.y += dy * t * l
+	return (pp1, pp2)
+
+
 def lines_exp_int_2d(p1, p2, p3, p4 ):
     """ LINES_EXP_INT_2D determines where two explicit lines intersect in 2D. """
     ival = 0
