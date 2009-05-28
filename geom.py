@@ -3,6 +3,7 @@
 import math
 from cgkit.cgtypes import vec3
 
+
 def r8mat_inverse_2d( mat ):
     """ R8MAT_INVERSE_2D inverts a 2 by 2 R8MAT using Cramer's rule.  """
     det = mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1]

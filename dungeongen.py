@@ -8,23 +8,12 @@ import random
 import geom
 from connection import Connection
 from sets import Set
+from room import Room
 
 config = Config(sample_buffers=1, samples=4,
 		depth_size=16, double_buffer=True,)
 window = pyglet.window.Window(resizable=True, config=config)
 
-class Room(object):
-	def __init__(self, centre, branches):
-		self.centre = centre
-		self.branches = branches
-		self.points = []
-		self.centre_point = []
-
-		
-	def build_geometry(self, points):
-		self.centre_point = [ ( points[self.centre].x, points[self.centre].y ) ]
-		for b in self.branches:
-			self.points = self.points + [ ( points[b].x, points[b].y ) ]
 		
 class Dungeon(object):
 	def __init__(self, gridx, gridy):
@@ -34,7 +23,8 @@ class Dungeon(object):
 		self.point_connection_count = []
 		self.connections = Set()
 		self.rooms = []
-		self.room_outlines =  []		
+		self.room_outlines =  []	
+		self.corridors = []	
 		return
 	
 	def generate_end_points(self, peturbation):
@@ -132,16 +122,31 @@ class Dungeon(object):
 	def build_room_geometry(self):
 		""" Given that the rooms have been identified, flesh out their geometry """
 		for r in self.rooms:
+			doors = []
 			for b in r.branches:
 				line = ( self.end_points[r.centre].x , self.end_points[r.centre].y,
 					 self.end_points[b].x, self.end_points[b].y )
 				## now, interoplate a bit along the line in order to get the vertex of a polygon
 				point = ((line[2] - line[0]) * 0.3 + line[0],
 					 (line[3] - line[1]) * 0.3 + line[1])				
-				r.points = r.points + [ point ]
+				points = geom.line_interp_perp2d(vec3(line[2], line[3]), vec3(line[0], line[1]), 0.05, -0.3)
+				r.points = r.points + [ (points[0].x, points[0].y), (points[1].x, points[1].y) ]
 			# print "Points: ", r.points
 		return
 	
+	def build_corridor_geometry(self):
+		for c in self.connections:
+			line_start = vec3(self.end_points[c[0]].x, self.end_points[c[0]].y)
+			line_end   = vec3(self.end_points[c[1]].x, self.end_points[c[1]].y)
+			start_door = geom.line_end_perp2d(line_start, line_end, 0.01) # magic number == corridor width
+			end_door   = geom.line_end_perp2d(line_end, line_start, 0.01) 
+			self.corridors = self.corridors + [ ( start_door[0].x, start_door[0].y, 
+							      start_door[1].x, start_door[1].y, 
+							      start_door[1].x, start_door[1].y, 
+							      end_door[0].x, end_door[0].y,
+							      end_door[1].x, end_door[1].y,
+							      start_door[0].x, start_door[0].y  ) ]
+			
 	def build_display_list(self):
 		"""" Actually build a list of primitives to draw """
 		glPointSize(4)
@@ -161,17 +166,17 @@ class Dungeon(object):
 			outline = []
 			for p in r.points:
 				outline = outline + [ p[0], p[1] ]
-			print outline
 			self.room_outlines.append(outline)			      
 		
 	def draw(self):
+		""" Do the drawing """
 		glColor3f(0.0,1.0,1.0)
 		pyglet.graphics.draw( len(self.vertices) / 2, pyglet.gl.GL_POINTS, ('v2f', self.vertices ))
 		glColor3f(1.0,0.0,0.0)
 		pyglet.graphics.draw( len(self.lines) / 2, pyglet.gl.GL_LINES, ('v2f', self.lines ))
 		glColor3f(0.0,0.0,1.0)		
-		for outline in self.room_outlines:
-			pyglet.graphics.draw( len(outline) / 2, pyglet.gl.GL_LINE_LOOP, ('v2f', outline ))
+		for corridor in self.corridors:
+			pyglet.graphics.draw( len(corridor) / 2, pyglet.gl.GL_LINES, ('v2f', corridor ))
 			
 def update(dt):
 		#print dt
@@ -224,7 +229,8 @@ dungeon.generate_end_points(0.65)
 dungeon.build_lines()
 dungeon.build_end_lines()
 dungeon.identify_rooms()
-dungeon.build_room_geometry()
+#dungeon.build_room_geometry()
+dungeon.build_corridor_geometry()
 dungeon.build_display_list()
 
 #print end_points
