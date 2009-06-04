@@ -1,8 +1,133 @@
 #!/usr/bin/env python
 
 import math
-from cgkit.cgtypes import vec3
 
+class vec2(object):
+    def __init__(self, x, y):
+        self.__dict__['value'] = (x, y)
+        self.__dict__['lookup'] = { 'x' : 0,  'y' : 1 }
+
+    def __eq__(self,other):
+        return ( other.value == self.value )
+    
+    def __str__(self):
+        return "|%f,%f|" % (self.value[0], self.value[1])
+    
+    def __hash__(self):
+        return self.value.__hash__()
+        
+    def __len__(self):
+        return 2
+    
+    def __getitem__(self,key):
+        assert(key >= 0)
+        assert(key < 2)
+        return self.value[key]
+        
+    def __contains__(self,item):
+        return (item in self.value)
+
+    def __getattr__(self, name):        
+        return self.__dict__['value'][self.__dict__['lookup'][name]]
+
+    def __setattr__(self, name, val):
+        if (self.value in self.__dict__['lookup'].keys()):
+            self.value[self.__dict__['lookup'][name]] = val
+        else:
+            self.__dict__[name] = val
+
+    def __sub__(self, other):
+        result = ([(x - y) for (x,y) in zip(self.value, other.value)])
+        return vec2(result[0], result[1])
+
+    def __add__(self, other):
+        result = vec2(*[(x - y) for (x,y) in zip(self.value, other.value)])
+        return vec2(result[0], result[1])
+
+    def __mul__(self, other):
+        result = vec2([ x * other ] for x in self.value)
+        return vec2(result[0], result[1])
+        
+    def __div__(self, other):
+        result = vec2([ x * ( 1.0 / other ) ] for x in self.value)
+        return vec2(result[0], result[1])
+
+    def length(self):
+        return math.sqrt(self.value[0] * self.value[0] + self.value[1] * self.value[1])
+
+class vec3(object):
+    def __init__(self, x, y, z):
+        self.__dict__['value'] = (x, y,  z)
+        self.__dict__['lookup'] = { 'x' : 0,  'y' : 1,  'z' : 2 }
+
+        
+    def __eq__(self,other):
+        return ( other.value == self.value )
+    
+    def __str__(self):
+        return "|%f,%f,%f|" % (self.value[0], self.value[1], self.value[2])
+    
+    def __hash__(self):
+        return self.value.__hash__()
+        
+    def __len__(self):
+        return 3
+    
+    def __getitem__(self,key):
+        assert(key >= 0)
+        assert(key < 3)
+        return self.value[key]
+        
+    def __contains__(self,item):
+        return (item in self.value)
+
+    def __getattr__(self, name):        
+        return self.__dict__['value'][self.__dict__['lookup'][name]]
+
+    def __setattr__(self, name, val):
+        if (self.value in self.__dict__['lookup'].keys()):
+            self.value[self.__dict__['lookup'][name]] = val
+        else:
+            self.__dict__[name] = val
+
+    def __sub__(self, other):
+        result = [(x - y) for (x,y) in zip(self.value, other.value)]
+        return vec3(result[0], result[1], result[2])
+
+    def __add__(self, other):
+        result = [(x - y) for (x,y) in zip(self.value, other.value)]
+        return vec3(result[0], result[1], result[2])
+
+    def __mul__(self, other):
+        result = [ x * other  for x in self.value ]
+        return vec3(result[0], result[1], result[2])
+        
+    def __div__(self, other):
+        result = [ x * ( 1.0 / other )  for x in self.value ]
+        return vec3(result[0], result[1], result[2])
+
+    def length(self):
+        return math.sqrt(self.value[0] * self.value[0] + self.value[1] * self.value[1] + self.value[2] * self.value[2])
+
+def line_exp_len_2d(p1, p2):
+    """  Returns the length of a line in explicit form """
+    dx = p1.x - p2.x
+    dy = p1.y - p2.y
+    return dx * dx + dy * dy
+
+def polar_to_xy ( r, t, xy ):
+    """    POLAR_TO_XY converts polar coordinates to XY coordinates.  """
+    xy = ( r * math.cos ( t ),  r * math.sin ( t ) )
+    return xy
+
+def xy_to_polar( xy ):
+    """  XY_TO_POLAR converts XY coordinates to polar coordinates. """
+    r = sqrt ( xy[0] * xy[0] + xy[1] * xy[1] );
+    if ( r == 0.0 ):
+        t = 0.0
+    else:
+        t = math.atan2( xy[0], xy[1] );
+    return ( t, r )
 
 def r8mat_inverse_2d( mat ):
     """ R8MAT_INVERSE_2D inverts a 2 by 2 R8MAT using Cramer's rule.  """
@@ -57,8 +182,8 @@ def line_end_perp2d(p1, p2, w):
 	l = math.sqrt( dx * dx + dy * dy)
 	dx = dx / l
 	dy = dy / l
-	pp1 = vec3(p1.x - dy * w, p1.y + dx * w)
-	pp2 = vec3(p1.x + dy * w, p1.y - dx * w)
+	pp1 = vec2(p1.x - dy * w, p1.y + dx * w)
+	pp2 = vec2(p1.x + dy * w, p1.y - dx * w)
 	return (pp1, pp2)
 
 # note t = 0 == p1 t == 1 == p2
@@ -69,8 +194,8 @@ def line_interp_perp2d(p1, p2, w, t):
 	l = math.sqrt( dx * dx + dy * dy)
 	dx = dx / l
 	dy = dy / l
-	pp1 = vec3(p1.x - dy * w, p1.y + dx * w)
-	pp2 = vec3(p1.x + dy * w, p1.y - dx * w)
+	pp1 = vec2(p1.x - dy * w, p1.y + dx * w)
+	pp2 = vec2(p1.x + dy * w, p1.y - dx * w)
         pp1.x += dx * t * l
         pp1.y += dy * t * l
         pp2.x += dx * t * l

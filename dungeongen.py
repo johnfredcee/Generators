@@ -2,7 +2,8 @@
 
 import pyglet
 from pyglet.gl import *
-from cgkit.cgtypes import vec3
+from geom import vec3
+from geom import vec2
 import math
 import random
 import geom
@@ -129,15 +130,15 @@ class Dungeon(object):
 				## now, interoplate a bit along the line in order to get the vertex of a polygon
 				point = ((line[2] - line[0]) * 0.3 + line[0],
 					 (line[3] - line[1]) * 0.3 + line[1])				
-				points = geom.line_interp_perp2d(vec3(line[2], line[3]), vec3(line[0], line[1]), 0.05, -0.3)
+				points = geom.line_interp_perp2d(vec2(line[2], line[3]), vec2(line[0], line[1]), 0.05, -0.3)
 				r.points = r.points + [ (points[0].x, points[0].y), (points[1].x, points[1].y) ]
 			# print "Points: ", r.points
 		return
 	
 	def build_corridor_geometry(self):
 		for c in self.connections:
-			line_start = vec3(self.end_points[c[0]].x, self.end_points[c[0]].y)
-			line_end   = vec3(self.end_points[c[1]].x, self.end_points[c[1]].y)
+			line_start = vec2(self.end_points[c[0]].x, self.end_points[c[0]].y)
+			line_end   = vec2(self.end_points[c[1]].x, self.end_points[c[1]].y)
 			start_door = geom.line_end_perp2d(line_start, line_end, 0.01) # magic number == corridor width
 			end_door   = geom.line_end_perp2d(line_end, line_start, 0.01) 
 			self.corridors = self.corridors + [ ( start_door[0].x, start_door[0].y, 
@@ -229,8 +230,8 @@ dungeon.generate_end_points(0.65)
 dungeon.build_lines()
 dungeon.build_end_lines()
 dungeon.identify_rooms()
-#dungeon.build_room_geometry()
 dungeon.build_corridor_geometry()
+dungeon.build_room_geometry()
 dungeon.build_display_list()
 
 #print end_points
