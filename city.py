@@ -2,7 +2,7 @@
 
 import pyglet
 from pyglet.gl import *
-from cgkit.cgtypes import vec3
+from geom import vec3
 import math
 import random
 from sets import Set
@@ -171,8 +171,8 @@ class City(object):
         
 
     def build_bounding_box(self):
-        self.topleft = vec3()
-        self.bottomright = vec3()
+        self.topleft = vec3(0.0,0.0,0.0)
+        self.bottomright = vec3(0.0,0.0,0.0)
         for c in self.end_points:
             if (c.x < self.topleft.x):
                 self.topleft.x = c.x

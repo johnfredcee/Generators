@@ -8,6 +8,7 @@ import math
 import random
 import geom
 from connection import Connection
+from corridor import Corridor
 from sets import Set
 from room import Room
 
@@ -23,6 +24,7 @@ class Dungeon(object):
 		self.end_points = []
 		self.point_connection_count = []
 		self.connections = Set()
+		self.corridors = []		
 		self.rooms = []
 		self.room_outlines =  []	
 		self.corridors = []	
@@ -119,34 +121,32 @@ class Dungeon(object):
 		#	print "Room"
 		#	print "Centre %s Branches %s " % (r.centre, r.branches)
 		return
+
 	
 	def build_room_geometry(self):
 		""" Given that the rooms have been identified, flesh out their geometry """
 		for r in self.rooms:
+			r.build_geometry(self.end_points)
 			doors = []
-			for b in r.branches:
-				line = ( self.end_points[r.centre].x , self.end_points[r.centre].y,
-					 self.end_points[b].x, self.end_points[b].y )
+			for point in r.points:
+				line = ( r.centre_point, point )
 				## now, interoplate a bit along the line in order to get the vertex of a polygon
-				point = ((line[2] - line[0]) * 0.3 + line[0],
-					 (line[3] - line[1]) * 0.3 + line[1])				
-				points = geom.line_interp_perp2d(vec2(line[2], line[3]), vec2(line[0], line[1]), 0.05, -0.3)
-				r.points = r.points + [ (points[0].x, points[0].y), (points[1].x, points[1].y) ]
+				door_point = vec2((line[1].x - line[0].x) * 0.25 + line[0].x,
+						  (line[1].y - line[0].y) * 0.25 + line[0].y)
+				r.doors += [ door_point ]
+				# door_line = ( door_point, geom.line_exp_perp_2d(line[0], line[1], door_point) )
+				# door_line_delta = door_line[1] - door_line[0]
+				# door_line_delta = door_line_delta * 1.0 / door_line_delta.length()
+				# door_line = ( door_point + ( door_line_delta * 0.02 ) , door_point - ( door_line_delta * 0.02 ) )
+				# r.doors = r.doors + [ door_line ]
 			# print "Points: ", r.points
 		return
 	
 	def build_corridor_geometry(self):
 		for c in self.connections:
-			line_start = vec2(self.end_points[c[0]].x, self.end_points[c[0]].y)
-			line_end   = vec2(self.end_points[c[1]].x, self.end_points[c[1]].y)
-			start_door = geom.line_end_perp2d(line_start, line_end, 0.01) # magic number == corridor width
-			end_door   = geom.line_end_perp2d(line_end, line_start, 0.01) 
-			self.corridors = self.corridors + [ ( start_door[0].x, start_door[0].y, 
-							      start_door[1].x, start_door[1].y, 
-							      start_door[1].x, start_door[1].y, 
-							      end_door[0].x, end_door[0].y,
-							      end_door[1].x, end_door[1].y,
-							      start_door[0].x, start_door[0].y  ) ]
+			corridor = Corridor(c, self.end_points[c[0]], self.end_points[c[1]])
+			corridor.make_geometry(0.01)
+			self.corridors += [ corridor ]
 			
 	def build_display_list(self):
 		"""" Actually build a list of primitives to draw """
@@ -162,22 +162,29 @@ class Dungeon(object):
 			self.lines.append( self.end_points[c[0]].y )
 			self.lines.append( self.end_points[c[1]].x )
 			self.lines.append( self.end_points[c[1]].y )
-		self.room_outlines = []
+		self.doors = []
 		for r in self.rooms:
-			outline = []
-			for p in r.points:
-				outline = outline + [ p[0], p[1] ]
-			self.room_outlines.append(outline)			      
+			for d in r.doors:
+				self.doors = self.doors + [ d.x, d.y ]
 		
 	def draw(self):
 		""" Do the drawing """
+		#centre points
 		glColor3f(0.0,1.0,1.0)
 		pyglet.graphics.draw( len(self.vertices) / 2, pyglet.gl.GL_POINTS, ('v2f', self.vertices ))
+		# connections
 		glColor3f(1.0,0.0,0.0)
 		pyglet.graphics.draw( len(self.lines) / 2, pyglet.gl.GL_LINES, ('v2f', self.lines ))
+		# corridors
 		glColor3f(0.0,0.0,1.0)		
 		for corridor in self.corridors:
-			pyglet.graphics.draw( len(corridor) / 2, pyglet.gl.GL_LINES, ('v2f', corridor ))
+#			print corridor.geometry
+			pyglet.graphics.draw( len(corridor.geometry) / 2, pyglet.gl.GL_LINES, ('v2f', corridor.geometry ))
+		glColor3f(0.0,0.0,0.0)
+		pyglet.graphics.draw( len(self.doors) / 2, pyglet.gl.GL_POINTS, ('v2f', self.doors ))
+		
+#		for door in self.doors:
+#			pyglet.graphics.draw( len(door) / 2, pyglet.gl.GL_LINES, ('v2f', door ))
 			
 def update(dt):
 		#print dt

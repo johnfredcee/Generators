@@ -2,7 +2,7 @@
 
 import pyglet
 from pyglet.gl import *
-from cgkit.cgtypes import vec3
+from geom import vec3
 import math
 import random
 import geom

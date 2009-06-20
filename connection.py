@@ -33,5 +33,15 @@ class Connection(object):
             return self.value[1]
         else:
             return self.value[0]
-        
-        
+
+    def closest(self, point, points):
+        """ Given a list of points that we index, return the closest connection end point to point """
+        result = 0
+        candidate = points[self.value[0]]
+        length0 = math.sqrt( ( point.x - candidate.x ) * ( point.x - candidate.x ) + ( point.y - candidate.y )  * ( point.y - candidate.y ) )
+        candidate = points[self.value[1]]        
+        length1 = math.sqrt( ( point.x - candidate.x ) * ( point.x - candidate.x ) + ( point.y - candidate.y )  * ( point.y - candidate.y ) )
+        if (length1 < length0):
+            result = 1
+        return result
+                
