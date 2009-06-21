@@ -9,7 +9,6 @@ import random
 import geom
 from connection import Connection
 from corridor import Corridor
-from sets import Set
 from room import Room
 
 config = Config(sample_buffers=1, samples=4,
@@ -23,11 +22,11 @@ class Dungeon(object):
 		self.gridy = gridy
 		self.end_points = []
 		self.point_connection_count = []
-		self.connections = Set()
+		self.connections = []
 		self.corridors = []		
 		self.rooms = []
 		self.room_outlines =  []	
-		self.corridors = []	
+		self.corridors = {}
 		return
 	
 	def generate_end_points(self, peturbation):
@@ -46,6 +45,7 @@ class Dungeon(object):
 
 	def build_lines(self):
 		self.closest = []
+		connections = set()
 		done = [ False ] * len(self.end_points)
 		ic = 0
 		for c in self.end_points[:-1]:
@@ -71,10 +71,12 @@ class Dungeon(object):
 					#print "!!", ix
 				i = i + 1    
 			#print ic, ix
-			self.connections.add(Connection(ic,ix))
+			connections.add(Connection(ic,ix))
 			done[ic] = True
 			#done[ix] = True
 			ic = ic + 1
+		for c in connections:
+			self.connections += [ c ]
 		return
 
 	def build_end_lines(self):
@@ -87,22 +89,30 @@ class Dungeon(object):
 			(p1, p2) = geom.line_end_perp2d(self.end_points[c[1]], self.end_points[c[0]], 0.05)
 			self.end_lines[c[1]].append((p1,p2))
 
-	def connection_count(self, ix):
+	def connection_count(self, point_index):
 		""" Calculate the number of connections associated with a single point"""		
 		result = 0
 		for c in self.connections:
-			if ix in c:
+			if point_index in c:
 				result = result + 1
 		return result
 
-	def connection_branches(self, ix):
+	def connection_branches(self, point_index):
 		""" Return a list of points connected to the given point """
 		result = []
 		for c in self.connections:
-			if ix in c:
-				result = result + [ c.other(ix) ]
+			if point_index in c:
+				result = result + [ c.other(point_index) ]
 		return result
 	
+	def connection_indexes(self, point_index):
+		""" Given the index of the end point in our array, look for the connections that contain it and return a list indexes of them """
+		result = []
+		ic = 0
+		for c in self.connections:
+			if point_index in c:
+				result = result + [ c ]
+				
 	def count_connections(self):
 		""" Calculate the number of connections associated with each point """
 		i = 0
@@ -143,10 +153,12 @@ class Dungeon(object):
 		return
 	
 	def build_corridor_geometry(self):
+		ci = 0
 		for c in self.connections:
-			corridor = Corridor(c, self.end_points[c[0]], self.end_points[c[1]])
+			corridor = Corridor(ci, self.end_points[c[0]], self.end_points[c[1]])
 			corridor.make_geometry(0.01)
-			self.corridors += [ corridor ]
+			self.corridors[ci] =  corridor 
+			ci = ci + 1
 			
 	def build_display_list(self):
 		"""" Actually build a list of primitives to draw """
@@ -177,8 +189,8 @@ class Dungeon(object):
 		pyglet.graphics.draw( len(self.lines) / 2, pyglet.gl.GL_LINES, ('v2f', self.lines ))
 		# corridors
 		glColor3f(0.0,0.0,1.0)		
-		for corridor in self.corridors:
-#			print corridor.geometry
+		for corridor in self.corridors.values():
+#			print dir(items[1])
 			pyglet.graphics.draw( len(corridor.geometry) / 2, pyglet.gl.GL_LINES, ('v2f', corridor.geometry ))
 		glColor3f(0.0,0.0,0.0)
 		pyglet.graphics.draw( len(self.doors) / 2, pyglet.gl.GL_POINTS, ('v2f', self.doors ))
