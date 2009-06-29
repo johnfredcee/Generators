@@ -27,6 +27,7 @@ class Dungeon(object):
 		self.rooms = []
 		self.room_outlines =  []	
 		self.corridors = {}
+		self.corridor_width = 0.01
 		return
 	
 	def generate_end_points(self, peturbation):
@@ -80,6 +81,7 @@ class Dungeon(object):
 		return
 
 	def build_end_lines(self):
+		""" Build a set of lines connecting each other to serve as our corridors """
 		self.end_lines = {}
 		for i in range(0, len(self.end_points)):
 			self.end_lines[i] = []
@@ -89,6 +91,16 @@ class Dungeon(object):
 			(p1, p2) = geom.line_end_perp2d(self.end_points[c[1]], self.end_points[c[0]], 0.05)
 			self.end_lines[c[1]].append((p1,p2))
 
+	def build_corridor_geometry(self):
+		""" Create corridors from the already identified pairs od endpoints """
+		ci = 0
+		for c in self.connections:
+			corridor = Corridor(ci, self.end_points[c[0]], self.end_points[c[1]])
+			corridor.make_geometry(self.corridor_width)
+			self.corridors[ci] =  corridor 
+			ci = ci + 1
+
+			
 	def connection_count(self, point_index):
 		""" Calculate the number of connections associated with a single point"""		
 		result = 0
@@ -111,8 +123,10 @@ class Dungeon(object):
 		ic = 0
 		for c in self.connections:
 			if point_index in c:
-				result = result + [ c ]
-				
+				result = result + [ ic ]
+			ic = ic + 1
+		return result
+	
 	def count_connections(self):
 		""" Calculate the number of connections associated with each point """
 		i = 0
@@ -125,7 +139,7 @@ class Dungeon(object):
 		self.count_connections()
 		for i in range(0, len(self.end_points)):
 			if self.point_connection_count[i] > 2:	
-				self.rooms.append(Room(i, self.connection_branches(i)))
+				self.rooms.append(Room(i, self.connection_branches(i), self.connection_indexes(i)))
 		#print "%d Rooms" % (len(self.rooms))
 		#for r in self.rooms:
 		#	print "Room"
@@ -150,15 +164,14 @@ class Dungeon(object):
 				# door_line = ( door_point + ( door_line_delta * 0.02 ) , door_point - ( door_line_delta * 0.02 ) )
 				# r.doors = r.doors + [ door_line ]
 			# print "Points: ", r.points
+			for ci in r.connections:
+				connection = self.connections[ci]
+				corridor = self.corridors[ci]
+				end = connection.closest(r.centre_point, self.end_points)
+				corridor.shorten(0.25, end, self.corridor_width)
+				
 		return
 	
-	def build_corridor_geometry(self):
-		ci = 0
-		for c in self.connections:
-			corridor = Corridor(ci, self.end_points[c[0]], self.end_points[c[1]])
-			corridor.make_geometry(0.01)
-			self.corridors[ci] =  corridor 
-			ci = ci + 1
 			
 	def build_display_list(self):
 		"""" Actually build a list of primitives to draw """

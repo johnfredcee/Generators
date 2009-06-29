@@ -12,10 +12,9 @@ class Corridor(object):
 		self.geometry = []
 		self.ends = []
 		self.corridor_index = ci
-		
-	def make_geometry(self, width):
-		self.ends = [ vec2(self.end_points[0].x, self.end_points[0].y),
-			      vec2(self.end_points[1].x, self.end_points[1].y) ]
+		return
+	
+	def make_walls_and_doors(self, width):
 		line_start = self.ends[0]
 		line_end   = self.ends[1]
 		start_door = geom.line_end_perp2d(line_start, line_end, width) # magic number == corridor width
@@ -30,3 +29,18 @@ class Corridor(object):
 				    
 				    end_door[1].x, end_door[1].y,     # side
 				    start_door[0].x, start_door[0].y  ) 
+		return
+	
+	def make_geometry(self, width):
+		self.ends = [ vec2(self.end_points[0].x, self.end_points[0].y),
+			      vec2(self.end_points[1].x, self.end_points[1].y) ]
+		self.make_walls_and_doors(width)
+		return
+	
+	def shorten(self, amount, end, width):
+		other_end = 1-end
+		new_line = self.ends[end] - self.ends[other_end]
+		delta = new_line / new_line.length()
+		self.ends[end] = self.ends[other_end] + delta * amount
+		self.make_walls_and_doors(width)
+		return

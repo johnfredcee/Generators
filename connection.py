@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import math
 
 class Connection(object):
     def __init__(self, a, b):
