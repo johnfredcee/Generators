@@ -51,7 +51,10 @@ class vec2(object):
     def __div__(self, other):
         result = [ x * ( 1.0 / other )  for x in self.value ]
         return vec2(result[0], result[1])
-
+    
+    def __repr__(self):
+        return "vec2(%f,%f)" % (value[0], value[1])
+    
     def length(self):
         return math.sqrt(self.value[0] * self.value[0] + self.value[1] * self.value[1])
 
@@ -59,7 +62,6 @@ class vec3(object):
     def __init__(self, x, y, z):
         self.__dict__['value'] = (x, y,  z)
         self.__dict__['lookup'] = { 'x' : 0,  'y' : 1,  'z' : 2 }
-
 
     def __eq__(self,other):
         return ( other.value == self.value )
@@ -106,6 +108,9 @@ class vec3(object):
         result = [ x * ( 1.0 / other )  for x in self.value ]
         return vec3(result[0], result[1], result[2])
 
+    def __repr__(self):
+        return "vec3(%f,%f,%f)" % (value[0], value[1], value[2])
+    
     def length(self):
         return math.sqrt(self.value[0] * self.value[0] + self.value[1] * self.value[1] + self.value[2] * self.value[2])
 

@@ -21,4 +21,5 @@ class Room(object):
 			length = geom.line_exp_len_2d(self.centre_point, end_point)
 			radius  = radius + length
 		self.radius = radius / ( len(self.branches) * 2.0 )
+		#print "Radius %s " % self.radius
 		return	

@@ -166,8 +166,14 @@ class Dungeon(object):
 			# print "Points: ", r.points
 			for ci in r.connections:
 				connection = self.connections[ci]
+				print "Room centere %s " % r.centre_point
+				print "Connection %d (%d,%d) " % (ci, self.connections[ci][0], self.connections[ci][1] )
+				print "Connection %s %s " % (self.end_points[self.connections[ci][0]], self.end_points[self.connections[ci][1]] ) 
 				corridor = self.corridors[ci]
+				print "Corridor ends 0 %s 1 % s " % (corridor.end_points[0], corridor.end_points[1])
 				end = connection.closest(r.centre_point, self.end_points)
+				print "end is %d " % end
+				assert(corridor.end_points[end] == vec3(r.centre_point.x, r.centre_point[1], 0.0))
 				corridor.shorten(0.25, end, self.corridor_width)
 				
 		return
@@ -257,7 +263,7 @@ def on_draw():
 	dungeon.draw()
 
 # Try and crete a window with multisampling (antialiasing)
-dungeon = Dungeon(8,8)
+dungeon = Dungeon(6,6)
 dungeon.generate_end_points(0.65)
 dungeon.build_lines()
 dungeon.build_end_lines()
