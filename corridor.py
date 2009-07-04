@@ -39,8 +39,9 @@ class Corridor(object):
 	
 	def shorten(self, amount, end, width):
 		other_end = 1-end
-		new_line = self.ends[end] - self.ends[other_end]
-		delta = new_line / new_line.length()
-		self.ends[end] = self.ends[other_end] + delta * amount
+		old_line = self.ends[end] - self.ends[other_end]
+		old_line_length = old_line.length()
+		delta = old_line / old_line.length()
+		self.ends[end] = self.ends[other_end] + delta * old_line_length * ( 1.0 - amount )
 		self.make_walls_and_doors(width)
 		return

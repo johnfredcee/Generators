@@ -166,13 +166,13 @@ class Dungeon(object):
 			# print "Points: ", r.points
 			for ci in r.connections:
 				connection = self.connections[ci]
-				print "Room centere %s " % r.centre_point
-				print "Connection %d (%d,%d) " % (ci, self.connections[ci][0], self.connections[ci][1] )
-				print "Connection %s %s " % (self.end_points[self.connections[ci][0]], self.end_points[self.connections[ci][1]] ) 
+				# print "Room centere %s " % r.centre_point
+				# print "Connection %d (%d,%d) " % (ci, self.connections[ci][0], self.connections[ci][1] )
+				# print "Connection %s %s " % (self.end_points[self.connections[ci][0]], self.end_points[self.connections[ci][1]] ) 
 				corridor = self.corridors[ci]
-				print "Corridor ends 0 %s 1 % s " % (corridor.end_points[0], corridor.end_points[1])
+				# print "Corridor ends 0 %s 1 % s " % (corridor.end_points[0], corridor.end_points[1])
 				end = connection.closest(r.centre_point, self.end_points)
-				print "end is %d " % end
+				# print "end is %d " % end
 				assert(corridor.end_points[end] == vec3(r.centre_point.x, r.centre_point[1], 0.0))
 				corridor.shorten(0.25, end, self.corridor_width)
 				
@@ -245,7 +245,7 @@ def setup():
 @window.event
 def on_resize(width, height):
 	# Override the default on_resize handler to create a 3D projection
-	print width, height
+	# print width, height
 	glMatrixMode(GL_PROJECTION)
 	glLoadIdentity()
 	glMatrixMode(GL_MODELVIEW)
