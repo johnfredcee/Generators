@@ -1,5 +1,6 @@
 import geom
 from geom import vec2
+from corridor import Corridor
 
 class Room(object):
 	def __init__(self, centre, branches, connections):
@@ -7,9 +8,10 @@ class Room(object):
 		self.branches = branches     # indexes of endpoints of connections this room makes with oter room (indexes end_points)
 		self.connections = connections # this one is same, but indexes connections
 		self.points = []             # points in polygon describing walls
-		self.centre_point = []       # centre of room
+		self.centre_point = None     # centre of room
 		self.doors = []
 		self.radius = 0
+		self.floorplan = []
 		
 	def build_geometry(self, points):
 		length = 0
@@ -22,4 +24,19 @@ class Room(object):
 			radius  = radius + length
 		self.radius = radius / ( len(self.branches) * 2.0 )
 		#print "Radius %s " % self.radius
-		return	
+		return
+
+	def convert_to_polar(self, point):
+		""" Convert this point to a polar coordinate (r, theta) centred on the room itself """
+		# need to look this up
+		point - self.centre_point
+		return geom.xy_to_polar(point - self.centre_point)
+	
+	def build_floorplan(self, corridors):
+		for ci in self.connections:
+			corridor = corridors[ci]
+			end = connection.closest(r.centre_point, self.end_point)
+			for point in corridor.door_geometry[end]:
+				self.floorplan += [ self.convert_to_polar(point) ]
+		# sort them in radial order
+		floorplan.sort(lambda p0, p1: p0.theta - p1.theta)

@@ -12,23 +12,26 @@ class Corridor(object):
 		self.geometry = []
 		self.ends = []
 		self.corridor_index = ci
+		self.start_door = None
+		self.end_door = None
 		return
 	
 	def make_walls_and_doors(self, width):
 		line_start = self.ends[0]
 		line_end   = self.ends[1]
-		start_door = geom.line_end_perp2d(line_start, line_end, width) # magic number == corridor width
-		end_door   = geom.line_end_perp2d(line_end, line_start, width)
-		self.geometry = (  start_door[0].x, start_door[0].y, # start door
-				   start_door[1].x, start_door[1].y, #				   
-				    start_door[1].x, start_door[1].y, # side
-				    end_door[0].x, end_door[0].y,     #
+		self.start_door = geom.line_end_perp2d(line_start, line_end, width) # magic number == corridor width
+		self.end_door   = geom.line_end_perp2d(line_end, line_start, width)
+		self.geometry = (  self.start_door[0].x, self.start_door[0].y, # start door
+				   self.start_door[1].x, self.start_door[1].y, #				   
 
-				    end_door[0].x, end_door[0].y,     # end door
-				    end_door[1].x, end_door[1].y,     #
+				   self.start_door[1].x, self.start_door[1].y, # side
+				    self.end_door[0].x, self.end_door[0].y,     #
+
+				    self.end_door[0].x, self.end_door[0].y,     # end door
+				    self.end_door[1].x, self.end_door[1].y,     #
 				    
-				    end_door[1].x, end_door[1].y,     # side
-				    start_door[0].x, start_door[0].y  ) 
+				    self.end_door[1].x, self.end_door[1].y,     # side
+				    self.start_door[0].x, self.start_door[0].y  ) 
 		return
 	
 	def make_geometry(self, width):
@@ -36,8 +39,8 @@ class Corridor(object):
 			      vec2(self.end_points[1].x, self.end_points[1].y) ]
 		self.make_walls_and_doors(width)
 		return
-	
-	def shorten(self, amount, end, width):
+
+	def shorten_corridor(self, amount, end, width):
 		other_end = 1-end
 		old_line = self.ends[end] - self.ends[other_end]
 		old_line_length = old_line.length()
@@ -45,3 +48,11 @@ class Corridor(object):
 		self.ends[end] = self.ends[other_end] + delta * old_line_length * ( 1.0 - amount )
 		self.make_walls_and_doors(width)
 		return
+
+	def door_geometry(self, end):
+		if (end == 0):
+			return ( self.start_door[0], self.start_door[1] )
+		if (end == 1):
+			return ( self.end_door[0], self.end_door[1] )
+			
+	

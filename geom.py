@@ -5,7 +5,7 @@ import math
 class vec2(object):
     def __init__(self, x, y):
         self.__dict__['value'] = (x, y)
-        self.__dict__['lookup'] = { 'x' : 0,  'y' : 1 }
+        self.__dict__['lookup'] = { 'x' : 0,  'y' : 1, 'r' : 0, 'theta' : 1 }
 
     def __eq__(self,other):
         return ( other.value == self.value )
@@ -286,3 +286,17 @@ def angle_turn_2d( p1, p2, p3 ):
 def catmull_rom( p0, p1, p2, p3, t ):
     """ Retuns a point on the catmull rom spline defined by control points p0,p3, endpoints p1,p2 at interval t  """
     return  0.5 * ( (2.0 * p1) + (-p0 + p2) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t + (-p0 + 3.0 * p1- 3.0 * p2 + p3) * t * t * t )
+
+
+def polar_to_xy(polar):
+    """ Convert vec2 in polar form to xy """
+    return vec2(math.cos(polar.theta) * polar.r, math.sin(polar.theta) * r)
+
+def xy_to_polar(xy):
+    """ XY_TO_POLAR converts XY coordinates to polar coordinates. """
+    r = math.sqrt( xy.x * xy.x + xy.y * xy.y )
+    if (r != 0):
+        result = vec2( r , math.atan2( xy.x, xy.y ) )
+    else:
+        result = vec2( 0, 0 )
+    return result

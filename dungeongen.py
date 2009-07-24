@@ -174,7 +174,8 @@ class Dungeon(object):
 				end = connection.closest(r.centre_point, self.end_points)
 				# print "end is %d " % end
 				assert(corridor.end_points[end] == vec3(r.centre_point.x, r.centre_point[1], 0.0))
-				corridor.shorten(0.25, end, self.corridor_width)
+				corridor.shorten_corridor(0.25, end, self.corridor_width)
+			r.build_floorplan(self.corridors)
 				
 		return
 	
