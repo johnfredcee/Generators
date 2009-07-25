@@ -2,6 +2,18 @@ import geom
 from geom import vec2
 from corridor import Corridor
 
+def compare_points(p0, p1):
+	result = p0.theta - p1.theta
+	if (result < 0):
+		return -1
+	if (result > 0):
+		return 1
+	else:
+		return 0
+	
+	
+	
+
 class Room(object):
 	def __init__(self, centre, branches, connections):
 		self.centre = centre
@@ -31,6 +43,7 @@ class Room(object):
 		# need to look this up
 		point - self.centre_point
 		return geom.xy_to_polar(point - self.centre_point)
+
 	
 	def build_floorplan(self, corridors, room_centre_points):
 		for ci in self.connections:
@@ -39,4 +52,4 @@ class Room(object):
 			for point in corridor.door_geometry(end):
 				self.floorplan += [ self.convert_to_polar(point) ]
 		# sort them in radial order
-		self.floorplan.sort(lambda p0, p1: p0.theta - p1.theta)
+		self.floorplan.sort(compare_points)
