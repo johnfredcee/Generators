@@ -32,11 +32,11 @@ class Room(object):
 		point - self.centre_point
 		return geom.xy_to_polar(point - self.centre_point)
 	
-	def build_floorplan(self, corridors):
+	def build_floorplan(self, corridors, room_centre_points):
 		for ci in self.connections:
 			corridor = corridors[ci]
-			end = connection.closest(r.centre_point, self.end_point)
-			for point in corridor.door_geometry[end]:
+			end = corridor.connection.closest(self.centre_point, room_centre_points) # which end of the corridor is closest to this room?
+			for point in corridor.door_geometry(end):
 				self.floorplan += [ self.convert_to_polar(point) ]
 		# sort them in radial order
-		floorplan.sort(lambda p0, p1: p0.theta - p1.theta)
+		self.floorplan.sort(lambda p0, p1: p0.theta - p1.theta)

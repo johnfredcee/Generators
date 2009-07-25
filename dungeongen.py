@@ -95,7 +95,7 @@ class Dungeon(object):
 		""" Create corridors from the already identified pairs od endpoints """
 		ci = 0
 		for c in self.connections:
-			corridor = Corridor(ci, self.end_points[c[0]], self.end_points[c[1]])
+			corridor = Corridor(c, ci, self.end_points[c[0]], self.end_points[c[1]])
 			corridor.make_geometry(self.corridor_width)
 			self.corridors[ci] =  corridor 
 			ci = ci + 1
@@ -175,7 +175,7 @@ class Dungeon(object):
 				# print "end is %d " % end
 				assert(corridor.end_points[end] == vec3(r.centre_point.x, r.centre_point[1], 0.0))
 				corridor.shorten_corridor(0.25, end, self.corridor_width)
-			r.build_floorplan(self.corridors)
+			r.build_floorplan(self.corridors, self.end_points)
 				
 		return
 	

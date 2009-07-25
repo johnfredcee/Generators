@@ -6,11 +6,12 @@ import math
 import geom
 
 class Corridor(object):
-	def __init__(self, ci, p1, p2):
+	def __init__(self, c, ci, p1, p2):
 #		self.room_indexes = (r1, r2)
-		self.end_points = (p1, p2)
-		self.geometry = []
-		self.ends = []
+		self.end_points = (p1, p2) # actual end points of connection
+		self.geometry = [] # geometry to use or draw ( a quadrilateral )
+		self.connection = c # connection formed by this corridor
+		self.ends = [] # actual ends of corridor ( often shorter than connection )
 		self.corridor_index = ci
 		self.start_door = None
 		self.end_door = None
