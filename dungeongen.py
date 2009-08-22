@@ -11,8 +11,7 @@ from connection import Connection
 from corridor import Corridor
 from room import Room
 
-config = Config(sample_buffers=1, samples=4,
-		depth_size=16, double_buffer=True,)
+config = Config(depth_size=16, double_buffer=True)
 window = pyglet.window.Window(resizable=True, config=config)
 
 		
@@ -198,7 +197,17 @@ class Dungeon(object):
 		for r in self.rooms:
 			for d in r.doors:
 				self.doors = self.doors + [ d.x, d.y ]
-		
+		for r in self.rooms:
+			r.floor_poly = []
+			for point in r.floorplan:
+				xy = r.convert_from_polar(point)
+				r.floor_poly.append( xy.x )
+				r.floor_poly.append( xy.y )
+			if (len(r.floor_poly) > 0):
+				xy = r.convert_from_polar(r.floorplan[0])
+				r.floor_poly.append( xy.x )
+				r.floor_poly.append( xy.y )
+				
 	def draw(self):
 		""" Do the drawing """
 		#centre points
@@ -217,8 +226,11 @@ class Dungeon(object):
 		
 #		for door in self.doors:
 #			pyglet.graphics.draw( len(door) / 2, pyglet.gl.GL_LINES, ('v2f', door ))
+		for room in self.rooms:
+			if (len(room.floor_poly) > 0):
+				pyglet.graphics.draw( len(room.floor_poly) / 2, pyglet.gl.GL_LINE_STRIP, ('v2f', room.floor_poly ) )
 			
-def update(dt):
+def update(dt): 
 		#print dt
 	return
 

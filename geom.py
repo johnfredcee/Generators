@@ -120,15 +120,15 @@ def line_exp_len_2d(p1, p2):
     dy = p1.y - p2.y
     return math.sqrt( dx * dx + dy * dy )
 
-def polar_to_xy ( r, t, xy ):
+def polar_to_xy ( point ):
     """    POLAR_TO_XY converts polar coordinates to XY coordinates.  """
-    xy = ( r * math.cos ( t ),  r * math.sin ( t ) )
+    xy = ( point.r * math.cos ( point.theta ),  point.r * math.sin ( point.theta ) )
     return xy
 
 def xy_to_polar( xy ):
     """  XY_TO_POLAR converts XY coordinates to polar coordinates. """
     r = sqrt ( xy[0] * xy[0] + xy[1] * xy[1] );
-    if ( r == 0.0 ):
+    if ( r == 0.0):
         t = 0.0
     else:
         t = math.atan2( xy[0], xy[1] );
@@ -290,7 +290,7 @@ def catmull_rom( p0, p1, p2, p3, t ):
 
 def polar_to_xy(polar):
     """ Convert vec2 in polar form to xy """
-    return vec2(math.cos(polar.theta) * polar.r, math.sin(polar.theta) * r)
+    return vec2(math.sin(polar.theta) * polar.r, math.cos(polar.theta) * polar.r)
 
 def xy_to_polar(xy):
     """ XY_TO_POLAR converts XY coordinates to polar coordinates. """

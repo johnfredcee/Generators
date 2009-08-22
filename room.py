@@ -11,9 +11,6 @@ def compare_points(p0, p1):
 	else:
 		return 0
 	
-	
-	
-
 class Room(object):
 	def __init__(self, centre, branches, connections):
 		self.centre = centre
@@ -44,8 +41,13 @@ class Room(object):
 		point - self.centre_point
 		return geom.xy_to_polar(point - self.centre_point)
 
+
+	def convert_from_polar(self, point):
+		""" Convert this polar pointer from polar form centred on the room to """
+		return geom.polar_to_xy(point) + self.centre_point
 	
 	def build_floorplan(self, corridors, room_centre_points):
+		""" Construct a floorplan for the room. Consists of a series of points describing a polygon around the room in polar form """
 		for ci in self.connections:
 			corridor = corridors[ci]
 			end = corridor.connection.closest(self.centre_point, room_centre_points) # which end of the corridor is closest to this room?
