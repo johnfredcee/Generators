@@ -23,6 +23,7 @@ class Room(object):
 		self.floorplan = []
 		
 	def build_geometry(self, points):
+		""" Builds the geometry for a room consisting of centre point, ad a number of corridor end points where each branch of a corridoor ends """
 		length = 0
 		radius = 0.0
 		self.centre_point = vec2( points[self.centre].x, points[self.centre].y ) 
@@ -53,5 +54,13 @@ class Room(object):
 			end = corridor.connection.closest(self.centre_point, room_centre_points) # which end of the corridor is closest to this room?
 			for point in corridor.door_geometry(end):
 				self.floorplan += [ self.convert_to_polar(point) ]
-		# sort them in radial order
+		# sort them in radial orde
 		self.floorplan.sort(compare_points)
+		new_floorplan = []
+		new_floorplan.append(self.floorplan[0])
+		for i in range(0, len(self.floorplan) - 1):
+			new_floorplan.append(vec2(self.floorplan[i].r,
+					     self.floorplan[i].theta +
+						  (self.floorplan[i+1].theta - self.floorplan[i].theta)  / 2))
+			new_floorplan.append(self.floorplan[i+1])
+		self.floorplan = new_floorplan
